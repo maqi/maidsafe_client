@@ -95,7 +95,7 @@ impl Client {
             routing_join_handle: Some(::std::thread::spawn(move || {
                 let _ = cloned_routing_client.lock().unwrap().bootstrap(None, None);
                 while !*routing_stop_flag_clone.lock().unwrap() {
-                    ::std::thread::sleep_ms(10);
+                    ::std::thread::sleep_ms(1);
                     cloned_routing_client.lock().unwrap().run();
                 }
             })),
@@ -113,28 +113,40 @@ impl Client {
         let put_res = client.routing.lock().unwrap().put(payload);
         match put_res {
             Ok(id) => {
-                let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
-                match response_getter.get() {
-                    Ok(_) => {
-                        let account_versions = maidsafe_types::StructuredData::new(client.session_packet_id.clone(),
-                                                                                   client.account.get_public_maid().name(),
-                                                                                   vec![encrypted_account.name()]);
-
-                        let put_res = client.routing.lock().unwrap().put(account_versions);
-
-                        match put_res {
-                            Ok(id) => {
-                                let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
-                                match response_getter.get() {
-                                    Ok(_) => Ok(client),
-                                    Err(_) => Err(::IoError::new(::std::io::ErrorKind::Other, "Version-Packet PUT-Response Failure !!")),
-                                }
-                            },
-                            Err(io_error) => Err(io_error),
-                        }
-                    },
-                    Err(_) => Err(::IoError::new(::std::io::ErrorKind::Other, "Session-Packet PUT-Response Failure !!")),
+                // Vault network does not guarantee to give a put response, the waiting for that shall not be blocking
+                // a put response will only be given when MaidManager reject the put request because of low allownance
+                let account_versions = maidsafe_types::StructuredData::new(client.session_packet_id.clone(),
+                                                                           client.account.get_public_maid().name(),
+                                                                           vec![encrypted_account.name()]);
+                let payload = Payload::new(PayloadTypeTag::StructuredData, &account_versions);
+                let put_res = client.routing.lock().unwrap().put(payload);
+                match put_res {
+                    Ok(id) => Ok(client),
+                    Err(io_error) => Err(io_error),
                 }
+
+                // let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
+                // match response_getter.get() {
+                //     Ok(_) => {
+                //         let account_versions = maidsafe_types::StructuredData::new(client.session_packet_id.clone(),
+                //                                                                    client.account.get_public_maid().name(),
+                //                                                                    vec![encrypted_account.name()]);
+
+                //         let put_res = client.routing.lock().unwrap().put(account_versions);
+
+                //         match put_res {
+                //             Ok(id) => {
+                //                 let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
+                //                 match response_getter.get() {
+                //                     Ok(_) => Ok(client),
+                //                     Err(_) => Err(::IoError::new(::std::io::ErrorKind::Other, "Version-Packet PUT-Response Failure !!")),
+                //                 }
+                //             },
+                //             Err(io_error) => Err(io_error),
+                //         }
+                //     },
+                //     Err(_) => Err(::IoError::new(::std::io::ErrorKind::Other, "Session-Packet PUT-Response Failure !!")),
+                // }
             },
             Err(io_error) => Err(io_error),
         }
@@ -175,7 +187,7 @@ impl Client {
             join_handle: Some(::std::thread::spawn(move || {
                 let _ = cloned_fake_routing_client.lock().unwrap().bootstrap(None, None);
                 while !*fake_routing_stop_flag_clone.lock().unwrap() {
-                    ::std::thread::sleep_ms(10);
+                    ::std::thread::sleep_ms(1);
                     cloned_fake_routing_client.lock().unwrap().run();
                 }
             })),
