@@ -24,7 +24,7 @@ use crypto::buffer::WriteBuffer;
 
 use routing;
 use maidsafe_types;
-use maidsafe_types::TypeTag;
+use maidsafe_types::{Payload, PayloadTypeTag, TypeTag};
 use routing::sendable::Sendable;
 
 mod user_account;
@@ -103,12 +103,14 @@ impl Client {
 
         {
             let destination = client.account.get_public_maid().name();
-            let boxed_public_maid = Box::new(client.account.get_public_maid().clone());
-            let _ = client.routing.lock().unwrap().unauthorised_put(destination, boxed_public_maid);
+            let public_maid = client.account.get_public_maid().clone();
+            let payload = Payload::new(PayloadTypeTag::PublicMaid, &public_maid);
+            let _ = client.routing.lock().unwrap().unauthorised_put(destination, Box::new(payload));
         }
 
         let encrypted_account = maidsafe_types::ImmutableData::new(client.account.encrypt(password, pin).ok().unwrap());
-        let put_res = client.routing.lock().unwrap().put(encrypted_account.clone());
+        let payload = Payload::new(PayloadTypeTag::ImmutableData, &encrypted_account);
+        let put_res = client.routing.lock().unwrap().put(payload);
         match put_res {
             Ok(id) => {
                 let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
