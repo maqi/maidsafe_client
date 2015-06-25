@@ -112,7 +112,7 @@ impl Client {
         let payload = Payload::new(PayloadTypeTag::ImmutableData, &encrypted_account);
         let put_res = client.routing.lock().unwrap().put(payload);
         match put_res {
-            Ok(id) => {
+            Ok(_) => {
                 // Vault network does not guarantee to give a put response, the waiting for that shall not be blocking
                 // a put response will only be given when MaidManager reject the put request because of low allownance
                 let account_versions = maidsafe_types::StructuredData::new(client.session_packet_id.clone(),
@@ -121,7 +121,7 @@ impl Client {
                 let payload = Payload::new(PayloadTypeTag::StructuredData, &account_versions);
                 let put_res = client.routing.lock().unwrap().put(payload);
                 match put_res {
-                    Ok(id) => Ok(client),
+                    Ok(_) => Ok(client),
                     Err(io_error) => Err(io_error),
                 }
 
@@ -192,7 +192,7 @@ impl Client {
                 }
             })),
         };
-
+        ::std::thread::sleep_ms(10000);
         let structured_data_type_id = maidsafe_types::data::StructuredDataTypeTag;
         let get_result = fake_routing_client.lock().unwrap().get(structured_data_type_id.type_tag(), user_network_id);
 
@@ -202,8 +202,8 @@ impl Client {
                 match response_getter.get() {
                     Ok(raw_data) => {
                         let mut decoder = cbor::Decoder::from_bytes(raw_data);
-                        let account_versions: maidsafe_types::StructuredData = decoder.decode().next().unwrap().unwrap();
-
+                        let payload: Payload = decoder.decode().next().unwrap().unwrap();
+                        let account_versions: maidsafe_types::StructuredData = payload.get_data();
                         match account_versions.value().pop() {
                             Some(latest_version) => {
                                 let immutable_data_type_id = maidsafe_types::data::ImmutableDataTypeTag;
@@ -214,8 +214,8 @@ impl Client {
                                         match response_getter.get() {
                                             Ok(raw_data) => {
                                                 let mut decoder = cbor::Decoder::from_bytes(raw_data);
-                                                let encrypted_account_packet: maidsafe_types::ImmutableData = decoder.decode().next().unwrap().unwrap();
-
+                                                let payload: Payload = decoder.decode().next().unwrap().unwrap();
+                                                let encrypted_account_packet: maidsafe_types::ImmutableData = payload.get_data();
                                                 let decryption_result = user_account::Account::decrypt(&encrypted_account_packet.value()[..], password, pin);
                                                 if decryption_result.is_err() {
                                                     return Err(::IoError::new(::std::io::ErrorKind::Other, "Could Not Decrypt Session Packet !! (Probably Wrong Password)"));
@@ -229,7 +229,7 @@ impl Client {
                                                 let cloned_routing_client = routing_client.clone();
                                                 let routing_stop_flag = ::std::sync::Arc::new(::std::sync::Mutex::new(false));
                                                 let routing_stop_flag_clone = routing_stop_flag.clone();
-
+                                                println!("\n returning");
                                                 let client = Client {
                                                     account: account_packet,
                                                     session_packet_id: user_account::Account::generate_network_id(keyword, pin),
