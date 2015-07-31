@@ -1,21 +1,21 @@
 os:
-- linux
-- osx
+  - linux
+  - osx
 language: rust
 rust:
-- nightly
+  - nightly
 sudo: false
 branches:
   only:
       - master
 install:
-- curl -sSL https://github.com/maidsafe/QA/raw/master/Bash%20Scripts/Travis/install_libsodium.sh | bash
-- export LIBRARY_PATH=$LIBRARY_PATH:$HOME/libsodium-1.0.3/lib && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/libsodium-1.0.3/lib
+  - curl -sSL https://github.com/maidsafe/QA/raw/master/Bash%20Scripts/Travis/install_libsodium.sh | bash
+  - export LIBRARY_PATH=$LIBRARY_PATH:$HOME/libsodium-1.0.3/lib && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/libsodium-1.0.3/lib
 script:
-- cargo build --verbose
-- cargo test --verbose
+  - cargo build --verbose
+  - cargo test --verbose
 after_success:
-- curl -sSL https://github.com/maidsafe/QA/raw/master/Bash%20Scripts/Travis/deploy_gh-pages.sh | bash
+  - curl -sSL https://github.com/maidsafe/QA/raw/master/Bash%20Scripts/Travis/deploy_gh-pages.sh | bash
 env:
   global:
-    secure: "g8lzQvNQYKdf/E7J29f/DCIyDFmj184qROzcShDO0ZsQNlnJPh26KdIx9paNgjh1Uo1myPUXjGvK6ZvammRSYhna0ZVvQPSnlpEGeDvRY7RrvxyrY45+SaaxWUqrc2XYwuhfL2ODIRrYGoIY+C+EKjGHchzzOTxeAgzwYSszlY8="
+    secure: "Q+SwRzZ0meFuwNj8DDctw6Wwk50/GhG9gQJQMyIcT0vdcVGeQlBSscQT9z2LHcezpS4hIgyosEqteOAtOmT78Lxaq0PVLX84lcym4WO8Bk7OQZ5jHddImCvygVAByZwEMC2MHyKkBkfsijAz0qvyyFIuPMbZ+I69jGppOtU/GB0="
