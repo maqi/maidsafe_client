@@ -100,7 +100,6 @@ impl MessageQueue {
                         match msg.content {
                             RequestContent::Post(data, _) => {
                                 let account_name = msg.src.get_name();
-                                let data_name = data.name();
                                 let mut dead_sender_positions = Vec::<usize>::new();
                                 let mut queue_guard = unwrap_result!(message_queue_cloned.lock());
                                 // The generic ResponseGetter waiting on the account_name
