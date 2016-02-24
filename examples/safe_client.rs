@@ -286,7 +286,7 @@ fn receiving_response(response_getter: &ResponseGetter) -> Result<MpidMessageWra
         match response_getter.get() {
             Ok(data) => {
                 match data {
-                    Data::PlainData(plain_data) => {
+                    Data::Plain(plain_data) => {
                         let mpid_message_wrapper : MpidMessageWrapper = unwrap_result!(deserialise(plain_data.value()));
                         return Ok(mpid_message_wrapper);
                     }

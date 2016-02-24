@@ -410,20 +410,12 @@ impl Client {
     //       post requests, as all such request will bearing the same name - mpid_account
     fn messaging_post_request(&self, mpid_account: &XorName, request: MpidMessageWrapper)
             -> Result<ResponseGetter, CoreError> {
-<<<<<<< HEAD
-        let data_request = DataRequest::PlainData(mpid_account.clone());
+        let data_request = DataRequest::Plain(mpid_account.clone());
         {  // avoiding dead_lock of messag_quese.lock() in add_data_receive_event_observer
             let mut msg_queue = unwrap_result!(self.message_queue.lock());
             if msg_queue.local_cache_check(mpid_account) {
                 return Ok(ResponseGetter::new(None, self.message_queue.clone(), data_request));
             }
-=======
-        let data_request = DataRequest::Plain(mpid_account.clone());
-
-        let mut msg_queue = unwrap_result!(self.message_queue.lock());
-        if msg_queue.local_cache_check(mpid_account) {
-            return Ok(ResponseGetter::new(None, self.message_queue.clone(), data_request));
->>>>>>> master
         }
 
         let serialised_request = try!(serialise(&request));
