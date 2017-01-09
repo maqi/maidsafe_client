@@ -58,9 +58,7 @@ pub fn get_approximate_space_for_data(owner_keys: Vec<sign::PublicKey>,
                                                        XorName([u8::MAX; XOR_NAME_LEN]),
                                                        u64::MAX,
                                                        Vec::new(),
-                                                       owner_keys,
-                                                       prev_owner_keys,
-                                                       None));
+                                                       owner_keys));
 
     // Fill it with rest of signatures
     structured_data.replace_signatures(

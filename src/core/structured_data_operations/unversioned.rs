@@ -65,9 +65,7 @@ pub fn create(client: Arc<Mutex<Client>>,
                                         id,
                                         version,
                                         data_to_store,
-                                        owner_keys,
-                                        prev_owner_keys,
-                                        Some(private_signing_key))))
+                                        owner_keys)))
         }
         DataFitResult::DataDoesNotFit => {
             trace!("Data does not fit in the StructuredData. Self-Encrypting data...");
